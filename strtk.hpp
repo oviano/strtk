@@ -14,6 +14,7 @@
  *****************************************************************
 */
 
+#define strtk_no_tr1_or_boost
 
 #ifndef INCLUDE_STRTK_HPP
 #define INCLUDE_STRTK_HPP
@@ -79,6 +80,20 @@
    #define strtk_disable_fallthrough_end   (void)0;
 #endif
 
+#ifdef __APPLE__
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    #pragma clang diagnostic ignored "-Wdeprecated-copy-with-user-provided-copy"
+#endif
+#endif
+
+#ifdef __ANDROID__
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wdeprecated-copy"
+#endif
+#endif
 
 namespace strtk
 {
@@ -1850,7 +1865,7 @@ namespace strtk
          if (!found || (p_itr != p_end)) continue;
 
          pos = std::distance(s_begin,temp_s_itr) - p_size;
-         int diff = pos - prev_pos;
+         int diff = (int)(pos - prev_pos);
 
          std::copy(s_itr,s_itr + diff, out);
          s_itr = temp_s_itr;
@@ -20611,7 +20626,7 @@ namespace strtk
             size_list.push_back(table_size_);
          }
 
-         inline virtual unsigned long long int size() const
+         inline unsigned long long int size() const override
          {
             return size_list.back();
          }
@@ -20653,7 +20668,7 @@ namespace strtk
 
       private:
 
-         inline virtual void compute_indices(const bloom_type& hash, std::size_t& bit_index, std::size_t& bit) const
+         inline void compute_indices(const bloom_type& hash, std::size_t& bit_index, std::size_t& bit) const override
          {
             bit_index = hash;
             for (std::size_t i = 0; i < size_list.size(); ++i)
@@ -21199,12 +21214,12 @@ namespace strtk
             : value_ptr_(&t)
             {}
 
-            inline virtual bool operator()(itr_type begin, itr_type end) const
+            inline bool operator()(itr_type begin, itr_type end) const override
             {
                return strtk::string_to_type_converter(begin,end,(*value_ptr_));
             }
 
-            inline virtual bool to_string(std::string& s) const
+            inline bool to_string(std::string& s) const override
             {
                return strtk::type_to_string((*value_ptr_),s);
             }
@@ -24514,5 +24529,17 @@ namespace strtk
    } // namespace information
 
 } // namespace strtk
+
+#ifdef __APPLE__
+#if defined(__clang__)
+    #pragma clang diagnostic pop
+#endif
+#endif
+
+#ifdef __ANDROID__
+#if defined(__clang__)
+    #pragma clang diagnostic pop
+#endif
+#endif
 
 #endif
